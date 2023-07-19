@@ -35,18 +35,24 @@ import GetByFetch from '../Helper/GetByFetch';
 import reactotron from 'reactotron-react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector } from 'react-redux';
+import { leaveData } from '../actions/UserActions';
 
 const {width, height} = Dimensions.get('window');
 
 function Leaves({navigation}) {
+
+  const token = useSelector(state => state?.user?.data?.data?.token);
+
+  const UserID = useSelector(state => state?.user?.data?.data?.user?.id);
+
   const [searchQuery, setSearchQuery] = React.useState('');
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState(new Date());
   const [formDate, setFormDate] = useState(new Date());
   const [formopen, setFormOpen] = useState(false);
 
-
-  const [leave,setLeave] = useState([]);
+  const [leave, setLeave] = useState([]);
 
   const onChangeSearch = query => setSearchQuery(query);
   const onPressLearnMore = () => {
@@ -97,23 +103,10 @@ function Leaves({navigation}) {
     return () => backHandler.remove();
   }, []);
 
-  const getLeaveApi = async () => {
- 
-    const currentUserID = await AsyncStorage.getItem('user_id');
-    const token = await AsyncStorage.getItem('user_token');
-    const resToken = JSON.parse(token)
-    const resposone = await axios.get(
-      `http://staging.walstartechnologies.com/api/Getleaves/${currentUserID}`,
-      {
-        headers: {
-          Authorization: `Bearer ${resToken}`,
-        },
-      },
-    );
-    reactotron.log("resposone---------->",resposone?.data?.leave)
-    setLeave(resposone?.data?.leave)
-
-  };
+  const getLeaveApi = async () =>{
+    const response = await dispatch(leaveData(token,UserID))
+    setLeave(response?.data?.leave);
+  }
 
   useEffect(() => {
     getLeaveApi();

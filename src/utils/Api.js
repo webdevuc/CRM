@@ -1,0 +1,1 @@
+export const baseURL = 'https://staging.walstartechnologies.com/api/';

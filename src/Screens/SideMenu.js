@@ -20,6 +20,8 @@ import {
   PermissionsAndroid,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { userLogout } from '../actions/UserActions';
+import { useSelector } from 'react-redux';
 
 export const MENU_INDIVIDUAL = [
   {
@@ -48,6 +50,9 @@ export const MENU_INDIVIDUAL = [
   }
 ]
 export default function SideMenu({ navigation }) {
+
+  const token = useSelector(state => state?.user?.data?.data?.token);
+
   const [name,setName]=useState('')
   const getUserName = useCallback(async() => {
     try {
@@ -65,14 +70,16 @@ useEffect(() => {
 
 
   const handleClick = async source => {
-    if (source.onPressScreen === 'Logout') {
+    if (source.onPressScreen === 'Logout' && token) {
       try {
         await AsyncStorage.clear()
+        dispatch(userLogout())
+       
       } catch(e) {
         // clear error
       }
     
-      console.log('Logout Done.')
+      // console.log('Logout Done.')
       navigation.navigate('Login');
 
     } else {

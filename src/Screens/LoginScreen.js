@@ -26,7 +26,9 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import Regex from '../utils/Validation';
-
+import {loginUser} from '../actions/UserActions';
+import {useDispatch, useSelector} from 'react-redux';
+import reactotron from 'reactotron-react-native';
 // function validateEmail(emailAdress) {
 //   let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 //   if (emailAdress.match(regexEmail)) {
@@ -48,6 +50,14 @@ import Regex from '../utils/Validation';
 // }
 
 export default function LoginScreen({navigation}) {
+  // const userRes = useSelector(state => state?.user?.data?._j?.data?.user?.employee_id);
+
+  // // .user?.data?.data?.token
+  // const token = useSelector(state => state?.user?.data?._j?.data?.token);
+  // reactotron.log("LOgin screen---",token)
+
+  const dispatch = useDispatch();
+
   const [email, setEmail] = useState('sharadb@walstartechnologies.com');
   const [password, setPassword] = useState('12345');
   const [passwordFlag, setPasswordFlag] = useState(true);
@@ -60,7 +70,14 @@ export default function LoginScreen({navigation}) {
     try {
       await AsyncStorage.setItem('user_token', JSON.stringify(data.token));
       await AsyncStorage.setItem('user_id', JSON.stringify(data.user.id));
+      await AsyncStorage.setItem(
+        'user_employee_id',
+        JSON.stringify(data.user.employee_id),
+      );
       var name = data.user.first_name + ' ' + data.user.last_name;
+
+      reactotron.log("LOGIN PAGE------->",name)
+
       await AsyncStorage.setItem('user_name', name);
       setEmail('');
       setPassword('');
@@ -69,7 +86,7 @@ export default function LoginScreen({navigation}) {
     } catch (e) {}
   };
 
-  const onLoginPressed = () => {
+  const onLoginPressed = async () => {
     NetInfo.fetch().then(state => {
       if (state.isConnected == true) {
         let errorFlag = false;
@@ -114,23 +131,36 @@ export default function LoginScreen({navigation}) {
           setEmailMessage('');
           setPasswordMessage('');
           setisLoader(true);
-          PostByFetch('login', {
-            // email:'akshayb@walstartechnologies.com',
-            // password:'Crm@12345'
-            email: email,
-            password: password,
-          }).then(async response => {
-            setisLoader(false);
-            setEmail('');
-            setPassword('');
-            if (response.error) {
-              inputRef.current.showBottom(
-                'Please check your login credication',
-              );
-            } else {
-              mergeUsers(response);
-            }
-          });
+
+          dispatch(
+            loginUser(
+              {
+                email: email,
+                password: password,
+              },
+              navigation,
+            ),
+          )
+            // navigation.navigate('DrawerNav')
+            // PostByFetch('login', {
+            //   // email:'akshayb@walstartechnologies.com',
+            //   // password:'Crm@12345'
+            //   email: email,
+            //   password: password,
+            // })
+
+            .then(async response => {
+              setisLoader(false);
+              setEmail('');
+              setPassword('');
+              if (response.error) {
+                inputRef.current.showBottom(
+                  'Please check your login credication',
+                );
+              } else {
+                mergeUsers(response);
+              }
+            });
         }
       } else {
         inputRef.current.showBottom('Please check your network connection');

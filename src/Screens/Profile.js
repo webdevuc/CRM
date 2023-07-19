@@ -29,10 +29,16 @@ import reactotron from 'reactotron-react-native';
 import Calendar from 'react-native-vector-icons/FontAwesome';
 import PostByFetch from '../Helper/PostByFetch';
 import axios from 'axios';
-import { RNToasty } from 'react-native-toasty'
-
+import {RNToasty} from 'react-native-toasty';
+import {useSelector} from 'react-redux';
+import {baseURL} from '../utils/Api';
+import { profileData, updateProfileData } from '../actions/UserActions';
 
 function Profile({navigation}) {
+  const token = useSelector(state => state?.user?.data?.data?.token);
+
+  const UserID = useSelector(state => state?.user?.data?.data?.user?.id);
+
   const [nightMode, setNightmode] = useState(false);
 
   const [name, setName] = useState('');
@@ -42,14 +48,11 @@ function Profile({navigation}) {
   const [address, setAddress] = useState('');
   const [designation, setDesignation] = useState('');
 
-  const [role,setRole]=useState('');
+  const [role, setRole] = useState('');
 
   const [open, setOpen] = useState(false);
   const [Dateofbirth, setFormDate] = useState(new Date());
   const [formopen, setFormOpen] = useState(false);
-
-
-
 
   useEffect(() => {
     const backAction = () => {
@@ -72,43 +75,61 @@ function Profile({navigation}) {
     return () => backHandler.remove();
   }, []);
 
-  const setStringValue = useCallback(
-    async value => {
-      try {
-        const currentUserID = await AsyncStorage.getItem('user_id');
-        GetByFetch(`GetUserData/${currentUserID}`).then(async response => {
-          const name =
-            response.user_data.first_name +
-            ' ' +
-            response.user_data.middle_name +
-            ' ' +
-            response.user_data.last_name;
+  // useEffect(() => {
+  //   getProfileData();
+  // }, []);
 
-          reactotron.log('Profile GET dAta----->', response?.user_data);
+  // const getProfileData = async () => {
+  //   try {
+  //     const res = await axios.get(`${baseURL}GetUserData/${UserID}`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     });
+  //     reactotron.log('get profile data------>', res?.data?.user_data);
 
-          setName(name);
-          setCompanyId(response.user_data.employee_id);
-          setEmail(response.user_data.email);
-          setAddress(response.user_data.address);
-          setPhoneNo(response.user_data.phone);
-          setDesignation(response.user_data.designation);
-          setFormDate(new Date(response.user_data.birth_date));
-          setRole(response.user_data.role)
-          // setFormDate(moment(response.user_data.birth_date).format())
-          // setValue(obj)
-        });
-      } catch (e) {
-        // save error
-        console.log('Dashboard e.', e);
-      }
-    },
-    [Dateofbirth],
-  );
+  //     const userData = res?.data?.user_data;
+  //     if (userData) {
+  //       const {first_name, middle_name, last_name} = userData;
+  //       const name = `${first_name} ${middle_name} ${last_name}`;
 
-  useEffect(() => {
-    // console.log("new Date() :- ",new Date())
-    setStringValue();
-  }, []);
+  //       setName(name);
+  //       setCompanyId(userData.employee_id);
+  //       setEmail(userData.email);
+  //       setAddress(userData.address);
+  //       setPhoneNo(userData.phone);
+  //       setDesignation(userData.designation);
+  //       setFormDate(new Date(userData.birth_date));
+  //       setRole(userData.role);
+  //     }
+  //   } catch (error) {
+  //     // Handle any errors
+  //   }
+  // };
+
+  const getProfile = async () => {
+    const res = await dispatch(profileData(token,UserID));
+
+    const userData = res?.data?.user_data;
+    if (userData) {
+      const {first_name, middle_name, last_name} = userData;
+      const name = `${first_name} ${middle_name} ${last_name}`;
+
+      setName(name);
+      setCompanyId(userData.employee_id);
+      setEmail(userData.email);
+      setAddress(userData.address);
+      setPhoneNo(userData.phone);
+      setDesignation(userData.designation);
+      setFormDate(new Date(userData.birth_date));
+      setRole(userData.role);
+    }
+
+  }
+
+  useEffect(()=>{
+    getProfile();
+  },[])
 
   const onFormDismiss = useCallback(() => {
     setFormOpen(false);
@@ -125,49 +146,32 @@ function Profile({navigation}) {
   );
 
   const updateProfile = async () => {
-    
+    const fullName = name;
+    const nameArray = fullName?.split(' ');
+    const first_name = nameArray[0];
+    const middle_name = nameArray[1];
+    const last_name = nameArray[2];
 
+    const payload = {
+      first_name,
+      middle_name,
+      last_name,
+      designation: designation,
+      companyId: companyId,
+      email: email,
+      phoneNo: phoneNo,
+      Dateofbirth: Dateofbirth,
+      address: address,
+      role: role,
+    };
 
-  const fullName = name;
-  const nameArray = fullName?.split(' ');
-  const first_name = nameArray[0];
-  const middle_name = nameArray[1];
-  const last_name = nameArray[2];
-
- 
-
-  const payload = {
-
-    first_name,
-    middle_name,
-    last_name,
-    designation: designation,
-    companyId: companyId,
-    email: email,
-    phoneNo: phoneNo,
-    Dateofbirth: Dateofbirth,
-    address:address,
-    role:role
-  };
-
-    const currentUserID = await AsyncStorage.getItem('user_id');
-    const token = await AsyncStorage.getItem('user_token');
-    const resToken = JSON.parse(token)
-    const resposone = await axios.post(
-      `http://staging.walstartechnologies.com/api/UpdateuserData/${currentUserID}`,payload,
-      {
-        headers: {
-          Authorization: `Bearer ${resToken}`,
-        },
-      },
-    );
-
+    const resposone = await dispatch(updateProfileData(token,UserID,payload))
     RNToasty.Success({
-      title: 'Profile Updated successfully.',
+      title: resposone.data.message,
       position: 'bottom',
+      duration:1
     });
-    reactotron.log("Respomde->",resposone)
-    navigation.navigate("Dashboard")
+    navigation.navigate('Dashboard');
   };
 
   return (
