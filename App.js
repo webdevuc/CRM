@@ -10,6 +10,7 @@ import SplashScreen from './src/Screens/SplashScreen';
 import {Provider as StoreProvider} from 'react-redux';
 import { persistor, store } from './src/store/store';
 import {PersistGate} from 'redux-persist/integration/react';
+import { ToastProvider } from 'react-native-toast-notifications';
 
 
 
@@ -20,6 +21,7 @@ const navOptionHandler = () => ({
 
 function App() {
   return (
+    <ToastProvider>
     <StoreProvider store={store}>
       <PersistGate persistor={persistor}>
         <NavigationContainer>
@@ -60,6 +62,7 @@ function App() {
         </NavigationContainer>
       </PersistGate>
     </StoreProvider>
+    </ToastProvider>
   );
 }
 

@@ -23,27 +23,18 @@ import reactotron from 'reactotron-react-native';
 
 
 
-export const loginUser = (data, navigation) => async dispatch =>{
+export const loginUser = (data, navigation,toast) => async dispatch =>{
   
   dispatch({type: USER_LOGIN_REQUEST});
   try {
     const res = await axios.post(`${baseURL}login`, data);
     dispatch({type: USER_LOGIN_SUCCESS, payload: res});
-    RNToasty.Success({
-      title: 'User logged in successfully.',
-      position: 'bottom',
-      duration: 1,
-    });
-
-    
+    toast.show("User logged in successfully");
     navigation.navigate('DrawerNav')
   } catch (e) {
 
     dispatch({type: USER_LOGIN_FAIL});
-    RNToasty.Success({
-      title: 'User logged in failed.',
-      position: 'bottom',
-    });
+    toast.show("User logged in failed.");
   }
 };
 

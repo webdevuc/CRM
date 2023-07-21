@@ -1,0 +1,28 @@
+export const globalColors = {
+  primaryTheme: '#264596',
+  backgroundTheme: '#12B0E8',
+  white: '#ffffff',
+  black: '#000000',
+  grey: '#898186',
+  blacktext: '#000000',
+  shadedPrimary: '#C70679',
+  completed: '#007E2F',
+  lightGrey: '#D3D3D3',
+  modal: '#0009',
+  yellow: '#FFB520',
+  whiteGrey: '#EEEEEE',
+  textGrey: '#898186',
+  golden: '#ffd700',
+  red: 'red',
+
+  drawerColor:'#191A48',
+  card2: '#fff',
+  skyBlue:'#5D9CEC',
+  Orange:'#ff9900',
+  darkOrange:'#cc7a00',
+  darkBlue:'#2F80E7',
+  yellowDark:'#D9AF30',
+  yellowDark1:'#B08D2A',
+  lightGreen:'#37BC9B',
+  darkGreen:'#2B957A'
+};

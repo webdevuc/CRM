@@ -18,12 +18,25 @@ import Profile from './Profile';
 import Leaves from './Leaves';
 import Dashboard from './Dashboard';
 import SideMenu from './SideMenu';
+import { globalColors } from '../theme/globalColors';
 
 const Drawer = createDrawerNavigator();
 
 function DrawerNav() {
   return (
     <Drawer.Navigator
+      screenOptions={{
+        headerRight: () => (
+          <Image
+            style={{
+              width: 40,
+              height: 30,
+              marginRight: 10,
+            }}
+            source={require('../Assets/WalstarLogo-01.png')}
+          />
+        ),
+      }}
       initialRouteName="Dashboard"
       drawerContent={props => <SideMenu {...props} />}>
       <Drawer.Screen
@@ -31,9 +44,9 @@ function DrawerNav() {
         component={Dashboard}
         options={{
           drawerLabel: 'Dashboard',
-          headerTintColor: '#fff',
+          headerTintColor: globalColors.white,
           headerStyle: {
-            backgroundColor: '#191A48',
+            backgroundColor:globalColors.drawerColor,
           },
         }}
       />
@@ -42,9 +55,9 @@ function DrawerNav() {
         component={Profile}
         options={{
           drawerLabel: 'Profile',
-          headerTintColor: '#fff',
+          headerTintColor: globalColors.white,
           headerStyle: {
-            backgroundColor: '#191A48',
+            backgroundColor: globalColors.drawerColor,
           },
         }}
       />
@@ -54,9 +67,9 @@ function DrawerNav() {
         component={Leaves}
         options={{
           drawerLabel: 'Leaves',
-          headerTintColor: '#fff',
+          headerTintColor: globalColors.white,
           headerStyle: {
-            backgroundColor: '#191A48',
+            backgroundColor: globalColors.drawerColor,
           },
         }}
       />

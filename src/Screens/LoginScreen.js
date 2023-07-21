@@ -11,6 +11,7 @@ import {
   Alert,
   TouchableOpacity,
   BackHandler,
+  ActivityIndicator,
 } from 'react-native';
 import PostByFetch from '../Helper/PostByFetch';
 import NetInfo from '@react-native-community/netinfo';
@@ -29,36 +30,15 @@ import Regex from '../utils/Validation';
 import {loginUser} from '../actions/UserActions';
 import {useDispatch, useSelector} from 'react-redux';
 import reactotron from 'reactotron-react-native';
-// function validateEmail(emailAdress) {
-//   let regexEmail = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-//   if (emailAdress.match(regexEmail)) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// }
+import { useToast } from 'react-native-toast-notifications';
 
-// function validatePassword(password) {
-//   let regexPassword = new RegExp(
-//     '(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})',
-//   );
-//   if (password.match(regexPassword)) {
-//     return false;
-//   } else {
-//     return true;
-//   }
-// }
 
 export default function LoginScreen({navigation}) {
-  // const userRes = useSelector(state => state?.user?.data?._j?.data?.user?.employee_id);
 
-  // // .user?.data?.data?.token
-  // const token = useSelector(state => state?.user?.data?._j?.data?.token);
-  // reactotron.log("LOgin screen---",token)
-
+  const toast = useToast();
   const dispatch = useDispatch();
 
-  const [email, setEmail] = useState('sharadb@walstartechnologies.com');
+  const [email, setEmail] = useState('akshayb@walstartechnologies.com');
   const [password, setPassword] = useState('12345');
   const [passwordFlag, setPasswordFlag] = useState(true);
   const [emailMessage, setEmailMessage] = useState('');
@@ -66,32 +46,15 @@ export default function LoginScreen({navigation}) {
   const [isLoader, setisLoader] = useState(false);
   const inputRef = React.useRef(null);
 
-  const mergeUsers = async data => {
-    try {
-      await AsyncStorage.setItem('user_token', JSON.stringify(data.token));
-      await AsyncStorage.setItem('user_id', JSON.stringify(data.user.id));
-      await AsyncStorage.setItem(
-        'user_employee_id',
-        JSON.stringify(data.user.employee_id),
-      );
-      var name = data.user.first_name + ' ' + data.user.last_name;
-
-      reactotron.log("LOGIN PAGE------->",name)
-
-      await AsyncStorage.setItem('user_name', name);
-      setEmail('');
-      setPassword('');
-      navigation.navigate('DrawerNav');
-      setisLoader(false);
-    } catch (e) {}
-  };
-
   const onLoginPressed = async () => {
+
+     
+  
+
     NetInfo.fetch().then(state => {
       if (state.isConnected == true) {
         let errorFlag = false;
-        // console.log('email-------------', email);
-        // console.log('pass-------------', password);
+
 
         if (!email || !password) {
           if (!email) {
@@ -130,7 +93,7 @@ export default function LoginScreen({navigation}) {
           errorFlag = true;
           setEmailMessage('');
           setPasswordMessage('');
-          setisLoader(true);
+          // setisLoader(true);
 
           dispatch(
             loginUser(
@@ -139,35 +102,22 @@ export default function LoginScreen({navigation}) {
                 password: password,
               },
               navigation,
+              toast
             ),
+           
           )
-            // navigation.navigate('DrawerNav')
-            // PostByFetch('login', {
-            //   // email:'akshayb@walstartechnologies.com',
-            //   // password:'Crm@12345'
-            //   email: email,
-            //   password: password,
-            // })
 
-            .then(async response => {
-              setisLoader(false);
-              setEmail('');
-              setPassword('');
-              if (response.error) {
-                inputRef.current.showBottom(
-                  'Please check your login credication',
-                );
-              } else {
-                mergeUsers(response);
-              }
-            });
+          setisLoader(true);
+          setTimeout(() => {
+            setisLoader(false);
+          }, 2000);
+
         }
       } else {
         inputRef.current.showBottom('Please check your network connection');
       }
     });
 
-    // navigation.navigate('Dashboard')
   };
   useEffect(() => {
     NetInfo.fetch().then(state => {
@@ -200,6 +150,7 @@ export default function LoginScreen({navigation}) {
 
   return (
     <>
+
       <View style={styles.container}>
         <View style={styles.container1}>
           <View style={styles.main_Container}>
@@ -282,13 +233,21 @@ export default function LoginScreen({navigation}) {
         <TouchableOpacity style={styles.loginBtn} onPress={onLoginPressed}>
           <Text style={styles.loginText}>Log In</Text>
         </TouchableOpacity>
+
+        {isLoader && (
+        <View>
+          <ActivityIndicator size="large" color="green" />
+        </View>
+      )}
+
       </View>
-      <Toast
+      {/* <Toast
         ref={inputRef}
         style={styles.toast}
         opacity={15}
         positionValue={65}
-      />
+      /> */}
+    
     </>
   );
 }

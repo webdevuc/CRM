@@ -11,26 +11,26 @@ import {
 import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-whc-toast';
+import { useSelector } from 'react-redux';
+import reactotron from 'reactotron-react-native';
 
 export default function SplashScreen({navigation}) {
+
+  const token = useSelector(state => state?.user?.data?.data?.token);
   const inputRef = React.useRef(null);
   useEffect(() => {
     NetInfo.fetch().then(state => {
       if (state.isConnected == true) {
-        AsyncStorage.getItem('user_token').then(token => {
-          if (token === '' || token === null) {
+          if (!token) {
             setTimeout(() => {
               navigation.navigate('Login');
-            }, 5000);
+            }, 3000);
           } else {
             setTimeout(() => {
               navigation.navigate('DrawerNav');
-            }, 5000);
+            }, 3000);
           }
-        });
-      } else {
-        inputRef.current.showBottom('Please check your network connection');
-      }
+    }
     });
   }, []);
   return (

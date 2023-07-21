@@ -21,7 +21,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { userLogout } from '../actions/UserActions';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 export const MENU_INDIVIDUAL = [
   {
@@ -44,6 +44,18 @@ export const MENU_INDIVIDUAL = [
   },
   {
     id: 4,
+    title: 'Monthy Salary Slip',
+    icon:"file-download",
+    onPressScreen: 'Profile'
+  },
+  {
+    id: 5,
+    title: 'Employee Status',
+    icon:"insert-drive-file",
+    onPressScreen: 'Leaves'
+  },
+  {
+    id: 4,
     title: 'Logout',
     icon:"exit-to-app",
     onPressScreen: 'Logout'
@@ -53,6 +65,7 @@ export default function SideMenu({ navigation }) {
 
   const token = useSelector(state => state?.user?.data?.data?.token);
 
+  const dispatch = useDispatch();
   const [name,setName]=useState('')
   const getUserName = useCallback(async() => {
     try {
@@ -70,18 +83,8 @@ useEffect(() => {
 
 
   const handleClick = async source => {
-    if (source.onPressScreen === 'Logout' && token) {
-      try {
-        await AsyncStorage.clear()
-        dispatch(userLogout())
-       
-      } catch(e) {
-        // clear error
-      }
-    
-      // console.log('Logout Done.')
-      navigation.navigate('Login');
-
+    if (source.onPressScreen === 'Logout') {   
+        dispatch(userLogout(navigation))
     } else {
       navigation.navigate(source.onPressScreen);
     }
@@ -167,7 +170,6 @@ const styles = StyleSheet.create({
     height: 95,
     width: 95,
     borderRadius: 50,
-    backgroundColor: 'red'
   },
   profilePicView: {
     borderRadius: (50),

@@ -35,24 +35,26 @@ import GetByFetch from '../Helper/GetByFetch';
 import reactotron from 'reactotron-react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useSelector } from 'react-redux';
-import { leaveData } from '../actions/UserActions';
+import {useSelector} from 'react-redux';
+import {leaveData} from '../actions/UserActions';
 
 const {width, height} = Dimensions.get('window');
 
 function Leaves({navigation}) {
-
   const token = useSelector(state => state?.user?.data?.data?.token);
-
   const UserID = useSelector(state => state?.user?.data?.data?.user?.id);
+
+  const leave = useSelector(state => state.leave?.data?.data);
+
+  reactotron.log('leave-------', leave);
+
+  const [search, setSearch] = useState('');
 
   const [searchQuery, setSearchQuery] = React.useState('');
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState(new Date());
   const [formDate, setFormDate] = useState(new Date());
   const [formopen, setFormOpen] = useState(false);
-
-  const [leave, setLeave] = useState([]);
 
   const onChangeSearch = query => setSearchQuery(query);
   const onPressLearnMore = () => {
@@ -103,10 +105,9 @@ function Leaves({navigation}) {
     return () => backHandler.remove();
   }, []);
 
-  const getLeaveApi = async () =>{
-    const response = await dispatch(leaveData(token,UserID))
-    setLeave(response?.data?.leave);
-  }
+  const getLeaveApi = async () => {
+    await dispatch(leaveData(token, UserID));
+  };
 
   useEffect(() => {
     getLeaveApi();
@@ -149,12 +150,12 @@ function Leaves({navigation}) {
 
           <TextInput
             returnKeyType="done"
-            // value={search}
+            value={search}
             onChangeText={text => setSearch(text)}
             placeholder={'Search'}
             style={styles.searchInput}
           />
-        </View>
+          </View>
 
         <View style={{marginTop: 10}}>
           <FontAwesome
@@ -170,7 +171,77 @@ function Leaves({navigation}) {
           <Title style={styles.titletext}>My Leaves</Title>
           <Divider style={styles.divider} />
 
-          {leave.map((item, index) => (
+          {/* <View style={styles.cardstyle}>
+            {leave?.leave?.length > 0 && (
+              <>
+                <Card style={styles.cardDesign}>
+                  <View style={styles.cardContent}>
+                    <Paragraph style={styles.subtext}>ID : </Paragraph>
+                    <Text style={styles.cardText}>
+                      {leave?.leave[0].totaltypecount}
+                    </Text>
+                  </View>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Paragraph style={styles.subtext}>Name : </Paragraph>
+                    <Text style={styles.cardText}>
+                      {leave?.leave[0].totaltypecount}
+                    </Text>
+                  </View>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Paragraph style={styles.subtext}>Leave Type : </Paragraph>
+                    <Text style={styles.cardText}>
+                      {leave?.leave[0].totaltypecount}
+                    </Text>
+                  </View>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Paragraph style={styles.subtext}>
+                      Leave Duration :{' '}
+                    </Paragraph>
+                    <Text style={styles.cardText}>
+                      {leave?.leave[0].totaltypecount}
+                    </Text>
+                  </View>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Paragraph style={styles.subtext}>No of Days : </Paragraph>
+                    <Text style={styles.cardText}>
+                      {' '}
+                      {leave?.leave[0].totaltypecount}
+                    </Text>
+                  </View>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Paragraph style={styles.subtext}>Applied on : </Paragraph>
+                    <Text style={styles.cardText}>
+                      {leave?.leave[0].totaltypecount}
+                    </Text>
+                  </View>
+                  <Divider style={styles.divider} />
+                  <View style={styles.cardButton}>
+                    <Title style={styles.pendingtext}>Pending</Title>
+                    <DatePickerModal
+                      locale="en"
+                      mode="single"
+                      visible={open}
+                      onDismiss={onDismissSingle}
+                      date={date}
+                      onConfirm={onConfirmSingle}
+                    />
+
+                    <DatePickerModal
+                      locale="en"
+                      mode="single"
+                      visible={formopen}
+                      onDismiss={onFormDismiss}
+                      dates={formDate}
+                      onConfirm={onFormConfirm}
+                    />
+                   
+                  </View>
+                </Card>
+              </>
+            )}
+          </View> */}
+
+          {leavesArray.map((item, index) => (
             <Card style={styles.cardDesign} key={index}>
               <View style={styles.cardContent}>
                 <Paragraph style={styles.subtext}>ID : </Paragraph>
@@ -190,10 +261,6 @@ function Leaves({navigation}) {
               </View>
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <Paragraph style={styles.subtext}>Applied on : </Paragraph>
-                <Text style={styles.cardText}></Text>
-              </View>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <Paragraph style={styles.subtext}>Action: </Paragraph>
                 <Text style={styles.cardText}></Text>
               </View>
               <Divider style={styles.divider} />
@@ -216,28 +283,7 @@ function Leaves({navigation}) {
                   dates={formDate}
                   onConfirm={onFormConfirm}
                 />
-                {/* <Text style={styles.calendarimg2}><Icon name="calendar" size={30} color="black" /></Text> */}
               </View>
-
-              {/* <TouchableOpacity
-                   style={{
-                     flexDirection: 'row',
-                     justifyContent: 'space-between',
-                     alignItems: 'center',
-                     borderWidth: 1,
-                     borderColor: 'black',
-                     padding: 10,
-                     borderRadius: 5,
-                   }}
-                   onPress={() => setFormOpen(true)}>
-                   <Text>{moment(formDate).format('DD/MM/YYYY')}</Text>
-                   <Icon
-                     name="calendar"
-                     size={25}
-                     color="black"
-                     style={{alignSelf: 'center'}}
-                   />
-              </TouchableOpacity> */}
             </Card>
           ))}
         </View>

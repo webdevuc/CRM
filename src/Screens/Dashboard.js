@@ -1,68 +1,38 @@
-/* eslint-disable no-trailing-spaces */
-/* eslint-disable no-unused-vars */
-/* eslint-disable quotes */
-/* eslint-disable prettier/prettier */
-/* eslint-disable react-native/no-inline-styles */
-
-import React, {useEffect, useCallback, useState} from 'react';
+import React, {useEffect} from 'react';
 import {
   View,
-  ScrollView,
-  Row,
-  Col,
   Text,
   StyleSheet,
   Image,
   Alert,
   BackHandler,
+  ScrollView,
 } from 'react-native';
 import {
-  Avatar,
-  Button,
-  Card,
   Title,
-  Paragraph,
-  Divider,
-  DataTable,
 } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome5';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import GetByFetch from '../Helper/GetByFetch';
-import reactotron from 'reactotron-react-native';
 import {useDispatch, useSelector} from 'react-redux';
-import axios from 'axios';
 import { dashboradData } from '../actions/UserActions';
+import { globalColors } from '../theme/globalColors';
 
-// const EmployeeID = useSelector(state => state?.user?.data?._j?.data?.user?.employee_id);
 
-function Dashboard({navigation}) {
+
+function Dashboard() {
 
   dispatch = useDispatch()
 
   const token = useSelector(state => state?.user?.data?.data?.token);
+  const dash = useSelector(state => state?.dash?.data?.data)
 
   const EmployeeID = useSelector(
     state => state?.user?.data?.data?.user?.employee_id,
   );
 
-  const [dashboardData, setDashboardData] = useState([
-    {
-      billableHrs: 0,
-      availableHrs: 0,
-    },
-  ]);
-  const [pendingLeave, setPendingLeave] = useState([]);
-
   const resData = async () =>{
-    const response = await dispatch(dashboradData(token,EmployeeID))
-    setDashboardData(response?.data)
-    setPendingLeave(response?.data?.pendingLeave);
+   await dispatch(dashboradData(token,EmployeeID))
   }
-
 
   useEffect(() =>  {
     resData();
@@ -89,7 +59,9 @@ function Dashboard({navigation}) {
     return () => backHandler.remove();
   }, []);
   return (
+    
     <View style={{flex: 1, backgroundColor: 'white'}}>
+      <ScrollView>
       <View
         style={{justifyContent: 'center', alignItems: 'center', marginTop: 15}}>
         <Text
@@ -108,39 +80,70 @@ function Dashboard({navigation}) {
         />
       </View>
       <View style={styles.cardstyle}>
-        <View style={[styles.leftCardSection, {backgroundColor: '#5D9CEC'}]}>
+        <View style={[styles.leftCardSection, {backgroundColor:globalColors.skyBlue}]}>
           <FontAwesome name="money" size={40} color="white" />
         </View>
-        <View style={[styles.rightCardSection, {backgroundColor: '#2F80E7'}]}>
-          <Title style={styles.title}>{dashboardData?.billableHrs}</Title>
+        <View style={[styles.rightCardSection, {backgroundColor: globalColors.darkBlue}]}>
+          <Title style={styles.title}>{dash?.billableHrs}</Title>
           <Title style={styles.ContentText}>Billable Hours</Title>
         </View>
       </View>
       <View style={styles.cardstyle}>
-        <View style={[styles.leftCardSection, {backgroundColor: '#37BC9B'}]}>
-          <MaterialIcons name="event-available" size={60} color="white" />
-        </View>
-        <View style={[styles.rightCardSection, {backgroundColor: '#2B957A'}]}>
-          <Title style={styles.title}>{dashboardData?.availableHrs}</Title>
-          <Title style={styles.ContentText}>Available Hours</Title>
-        </View>
-      </View>
-      <View style={styles.cardstyle}>
-        {pendingLeave?.length > 0 && (
+        {dash?.pendingLeave?.length > 0 && (
           <>
             <View
-              style={[styles.leftCardSection, {backgroundColor: '#D9AF30'}]}>
-              <MaterialIcons name="pending-actions" size={50} color="white" />
+              style={[styles.leftCardSection, {backgroundColor: globalColors.yellowDark}]}>
+              <MaterialIcons name="pending-actions" size={40} color="white" />
             </View>
             <View
-              style={[styles.rightCardSection, {backgroundColor: '#B08D2A'}]}>
-              <Title style={styles.title}>{pendingLeave[0].pendingCount}</Title>
+              style={[styles.rightCardSection, {backgroundColor: globalColors.yellowDark1}]}>
+              <Title style={styles.title}>{dash?.pendingLeave[0].pendingCount}</Title>
               <Title style={styles.ContentText}>Pending Leaves</Title>
             </View>
           </>
         )}
       </View>
- 
+
+      <View style={styles.cardstyle}>
+        <View style={[styles.leftCardSection, {backgroundColor: globalColors.lightGreen}]}>
+          <MaterialIcons name="time-to-leave" size={40} color="white" />
+        </View>
+        <View style={[styles.rightCardSection, {backgroundColor: globalColors.darkGreen}]}>
+          <Title style={styles.title}>{dash?.taken_Leave}</Title>
+          <Title style={styles.ContentText}>Taken Leaves</Title>
+        </View>
+      </View>
+
+      <View style={styles.cardstyle}>
+        <View style={[styles.leftCardSection, {backgroundColor: globalColors.skyBlue}]}>
+          <MaterialIcons name="cake" size={40} color="white" />
+        </View>
+        <View style={[styles.rightCardSection, {backgroundColor: globalColors.darkBlue}]}>
+          <Title style={styles.title}>{dash?.taken_Leave}</Title>
+          <Title style={styles.ContentText}>Today's Birthday</Title>
+        </View>
+      </View>
+
+      <View style={styles.cardstyle}>
+        <View style={[styles.leftCardSection, {backgroundColor: globalColors.yellowDark}]}>
+          <MaterialIcons name="work" size={40} color="white" />
+        </View>
+        <View style={[styles.rightCardSection, {backgroundColor:globalColors.yellowDark1}]}>
+          <Title style={styles.title}>{dash?.taken_Leave}</Title>
+          <Title style={styles.ContentText}>Today's Work Anniversary</Title>
+        </View>
+      </View>
+
+      <View style={styles.cardstyle}>
+        <View style={[styles.leftCardSection, {backgroundColor: globalColors.lightGreen}]}>
+          <MaterialIcons name="time-to-leave" size={40} color="white" />
+        </View>
+        <View style={[styles.rightCardSection, {backgroundColor: globalColors.darkGreen}]}>
+          <Title style={styles.title}>{dash?.taken_Leave}</Title>
+          <Title style={styles.ContentText}>Upcoming Holiday's</Title>
+        </View>
+      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -150,7 +153,7 @@ export default Dashboard;
 const styles = StyleSheet.create({
   title: {
     color: 'white',
-    fontSize: 30,
+    fontSize: 20,
   },
   cardstyle: {
     flexDirection: 'row',
@@ -164,14 +167,13 @@ const styles = StyleSheet.create({
     width: '30%',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 25,
+    paddingVertical: 10,
     borderBottomLeftRadius: 10,
     borderTopLeftRadius: 10,
   },
   rightCardSection: {
     width: '70%',
     paddingLeft: 20,
-    paddingVertical: 25,
     borderBottomRightRadius: 10,
     borderTopRightRadius: 10,
   },
