@@ -16,6 +16,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useDispatch, useSelector} from 'react-redux';
 import { dashboradData } from '../actions/UserActions';
 import { globalColors } from '../theme/globalColors';
+import reactotron from 'reactotron-react-native';
 
 
 
@@ -26,12 +27,14 @@ function Dashboard() {
   const token = useSelector(state => state?.user?.data?.data?.token);
   const dash = useSelector(state => state?.dash?.data?.data)
 
-  const EmployeeID = useSelector(
-    state => state?.user?.data?.data?.user?.employee_id,
+  const UserID = useSelector(
+    state => state?.user?.data?.data?.user?.id,
   );
 
+    reactotron.log("dash -------->",dash)
+
   const resData = async () =>{
-   await dispatch(dashboradData(token,EmployeeID))
+   await dispatch(dashboradData(token,UserID))
   }
 
   useEffect(() =>  {
@@ -84,12 +87,12 @@ function Dashboard() {
           <FontAwesome name="money" size={40} color="white" />
         </View>
         <View style={[styles.rightCardSection, {backgroundColor: globalColors.darkBlue}]}>
-          <Title style={styles.title}>{dash?.billableHrs}</Title>
+          <Title style={styles.title}>{dash?.billable_hrs}</Title>
           <Title style={styles.ContentText}>Billable Hours</Title>
         </View>
       </View>
       <View style={styles.cardstyle}>
-        {dash?.pendingLeave?.length > 0 && (
+        {/* {dash?.pendingLeave?.length > 0 && ( */}
           <>
             <View
               style={[styles.leftCardSection, {backgroundColor: globalColors.yellowDark}]}>
@@ -97,11 +100,11 @@ function Dashboard() {
             </View>
             <View
               style={[styles.rightCardSection, {backgroundColor: globalColors.yellowDark1}]}>
-              <Title style={styles.title}>{dash?.pendingLeave[0].pendingCount}</Title>
+              <Title style={styles.title}>{dash?.pending_leaves}</Title>
               <Title style={styles.ContentText}>Pending Leaves</Title>
             </View>
           </>
-        )}
+        {/* )} */}
       </View>
 
       <View style={styles.cardstyle}>
@@ -109,7 +112,7 @@ function Dashboard() {
           <MaterialIcons name="time-to-leave" size={40} color="white" />
         </View>
         <View style={[styles.rightCardSection, {backgroundColor: globalColors.darkGreen}]}>
-          <Title style={styles.title}>{dash?.taken_Leave}</Title>
+          <Title style={styles.title}>{dash?.taken_leaves}</Title>
           <Title style={styles.ContentText}>Taken Leaves</Title>
         </View>
       </View>
@@ -119,7 +122,7 @@ function Dashboard() {
           <MaterialIcons name="cake" size={40} color="white" />
         </View>
         <View style={[styles.rightCardSection, {backgroundColor: globalColors.darkBlue}]}>
-          <Title style={styles.title}>{dash?.taken_Leave}</Title>
+          <Title style={styles.title}>{dash?.todays_birthdays}</Title>
           <Title style={styles.ContentText}>Today's Birthday</Title>
         </View>
       </View>
@@ -129,7 +132,7 @@ function Dashboard() {
           <MaterialIcons name="work" size={40} color="white" />
         </View>
         <View style={[styles.rightCardSection, {backgroundColor:globalColors.yellowDark1}]}>
-          <Title style={styles.title}>{dash?.taken_Leave}</Title>
+          <Title style={styles.title}>{dash?.todays_workanniversary}</Title>
           <Title style={styles.ContentText}>Today's Work Anniversary</Title>
         </View>
       </View>
@@ -139,7 +142,7 @@ function Dashboard() {
           <MaterialIcons name="time-to-leave" size={40} color="white" />
         </View>
         <View style={[styles.rightCardSection, {backgroundColor: globalColors.darkGreen}]}>
-          <Title style={styles.title}>{dash?.taken_Leave}</Title>
+          <Title style={styles.title}>{dash?.upcoming_holidays}</Title>
           <Title style={styles.ContentText}>Upcoming Holiday's</Title>
         </View>
       </View>

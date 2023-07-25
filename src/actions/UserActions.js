@@ -45,14 +45,16 @@ export const userLogout = (navigation) => async dispatch => {
   };
 
 
-export const dashboradData = (token,EmployeeID) => async dispatch => {
+export const dashboradData = (token,UserID) => async dispatch => {
   dispatch({type: GET_DASHBOARD_REQUEST});
   try {
-    const res = await axios.get(`${baseURL}GetDashboardData/${EmployeeID}`,{
+    const res = await axios.get(`${baseURL}get-dashboard/${UserID}`,{
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
+
+    
 
     dispatch({type: GET_DASHBOARD_SUCCESS, payload:res});
     return res;
@@ -81,11 +83,14 @@ export const leaveData = (token,UserID) => async dispatch => {
 export const profileData = (token,UserID) => async dispatch => {
   dispatch({type: GET_PROFILE_REQUEST});
   try {
-    const res = await axios.get(`${baseURL}GetUserData/${UserID}`,{
+    const res = await axios.get(`${baseURL}get-user/${UserID}`,{
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
+
+    reactotron.log("get-user",res)
+
     dispatch({type: GET_PROFILE_SUCCESS, payload:res});
     return res;
   } catch (e) {

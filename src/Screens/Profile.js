@@ -363,7 +363,9 @@ function Profile({navigation}) {
 
   const UserID = useSelector(state => state?.user?.data?.data?.user?.id);
 
-  const profile = useSelector(state => state?.profile?.data?.data?.user_data);
+  const profile = useSelector(state => state?.profile?.data?.data?.data);
+
+  reactotron.log("profile",profile)
 
   const isFocused = useIsFocused();
   const [nightMode, setNightmode] = useState(false);
@@ -384,6 +386,9 @@ function Profile({navigation}) {
   const [open, setOpen] = useState(false);
   const [Dateofbirth, setFormDate] = useState(new Date());
   const [formopen, setFormOpen] = useState(false);
+
+
+  const [isErrorEmail, setIsErrorEmail] = useState(false);
 
   useEffect(() => {
     const backAction = () => {
@@ -417,9 +422,9 @@ function Profile({navigation}) {
       setName(name);
       setCompanyId(profile.employee_id);
       setEmail(profile.email);
-      setAddress(profile.address);
-      setPhoneNo(profile.phone);
-      setDesignation(profile.designation);
+      setAddress(profile?.user_otherdetails.address);
+      setPhoneNo(profile?.user_otherdetails?.alternative_phone);
+      setDesignation(profile?.user_otherdetails?.name);
       setFormDate(new Date(profile.birth_date));
       setRole(profile.role);
       setImgUri(profile?.avatar);
@@ -438,7 +443,7 @@ function Profile({navigation}) {
 
   const onFormConfirm = React.useCallback(
     params => {
-      console.log('fdfsdfsdfdsfs:-    ' + JSON.stringify(params));
+      reactotron.log('fdfsdfsdfdsfs:-    ' + JSON.stringify(params));
       setFormOpen(false);
       setFormDate(params.date);
       // setRange({ startDate, endDate });
@@ -493,6 +498,25 @@ function Profile({navigation}) {
       setPic(res);
       setPhoto(res && res.assets && res.assets[0] && res.assets[0].uri);
     });
+  };
+
+  const handleEmail = text => {
+    const trimmedText = text.trimStart();
+
+    setEmail(trimmedText);
+
+    const emailRegex =
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?$/;
+
+    if (emailRegex.test(trimmedText)) {
+      if (trimmedText.split('.com').length - 1 > 1) {
+        setIsErrorEmail(true);
+      } else {
+        setIsErrorEmail(false);
+      }
+    } else {
+      setIsErrorEmail(true);
+    }
   };
 
   return (
@@ -551,7 +575,7 @@ function Profile({navigation}) {
             )}
           </View>
           <Text style={styles.infoValue}>EmpId : {profile?.employee_id}</Text>
-          <Text style={styles.infoValue}>{profile?.designation}</Text>
+          <Text style={styles.infoValue}>{profile?.user_role?.name}</Text>
         </View>
         <View style={styles.infoSection}>
           <TouchableOpacity style={styles.infoItem}>
@@ -586,14 +610,19 @@ function Profile({navigation}) {
                       : styles.infoValue
                   }
                   value={email}
-                  onChangeText={setEmail}
+                  // onChangeText={setEmail}
+                  onChangeText={handleEmail}
                 />
               ) : (
                 <Text style={styles.infoValue}>{profile?.email}</Text>
               )}
             </View>
           </TouchableOpacity>
-
+          {isErrorEmail && (
+              <Text style={[{color: 'red', marginLeft: 20}]}>
+                Please enter a valid Email address
+              </Text>
+            )}
           <TouchableOpacity style={styles.infoItem}>
             <View>
               <MaterialIcons
@@ -612,10 +641,12 @@ function Profile({navigation}) {
                       : styles.infoValue
                   }
                   value={phoneNo}
+                  maxLength={10}
+                  keyboardType="number-pad"
                   onChangeText={setPhoneNo}
                 />
               ) : (
-                <Text style={styles.infoValue}>{profile?.phone}</Text>
+                <Text style={styles.infoValue}>{profile?.user_otherdetails?.alternative_phone}</Text>
               )}
             </View>
           </TouchableOpacity>
@@ -689,7 +720,7 @@ function Profile({navigation}) {
                   multiline={true}
                 />
               ) : (
-                <Text style={[styles.infoValue,{marginRight:5}]}>{profile?.address}</Text>
+                <Text style={[styles.infoValue,{marginRight:5}]}>{profile?.user_otherdetails?.address}</Text>
               )}
             </View>
           </TouchableOpacity>

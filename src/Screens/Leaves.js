@@ -37,6 +37,9 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useSelector} from 'react-redux';
 import {leaveData} from '../actions/UserActions';
+import {globalColors} from '../theme/globalColors';
+import Icons from 'react-native-vector-icons/MaterialIcons';
+import FilterModal from '../CommonComponents/FilterModal';
 
 const {width, height} = Dimensions.get('window');
 
@@ -55,6 +58,7 @@ function Leaves({navigation}) {
   const [date, setDate] = useState(new Date());
   const [formDate, setFormDate] = useState(new Date());
   const [formopen, setFormOpen] = useState(false);
+  const [filterModal, setFilterModal] = useState(false);
 
   const onChangeSearch = query => setSearchQuery(query);
   const onPressLearnMore = () => {
@@ -117,31 +121,89 @@ function Leaves({navigation}) {
     {
       id: 1,
       leaveType: 'Medical leave',
-      date: '23/07/2023',
-      days: 1,
+      date: '23/07/2023 - 25/07/2023',
+      days: 2,
+      leaveStatus: 'Pending',
+      reason: 'I am going out of station.',
     },
     {
       id: 2,
       leaveType: 'Causual leave',
       date: '12/07/2023',
       days: 1,
+      leaveStatus: 'Approved',
+      reason: 'I am going out of station.',
     },
     {
       id: 3,
       leaveType: 'Causual leave',
       date: '13/07/2023',
       days: 1,
+      leaveStatus: 'Cancelled',
+      reason: 'I am going out of station.',
     },
     {
       id: 4,
       leaveType: 'Sick leave',
       date: '18/08/2023',
       days: 1,
+      leaveStatus: 'Approved',
+      reason: 'I am going out of station.',
     },
   ];
 
+  const results = leavesArray?.filter(post => {
+    if (search === '') {
+      return post;
+    } else if (post.leaveType?.toLowerCase()?.includes(search?.toLowerCase())) {
+      return post;
+    }
+  });
+
+  reactotron.log('search result---->', results);
+
+  const getLeaveStatusColor = status => {
+    switch (status) {
+      case 'Pending':
+        return '#FFC000'; // Orange
+      case 'Approved':
+        return '#008000'; // Green
+      case 'Cancelled':
+      case 'Rejected':
+        return '#FF0000'; // Red
+      default:
+        return '#000000'; // Black (Fallback color)
+    }
+  };
+
+
+  const filterOptions = [
+    {
+      key: 'resource',
+      rightText: 'Get Resource list',
+    },
+    {
+      key: 'dates',
+      rightText: 'Dates filter',
+    },
+
+    {
+      key: 'status',
+      rightText: 'Status',
+    },
+    {
+      key: 'type',
+      rightText: 'Leave type',
+    },
+    {
+      key: 'office',
+      rightText: 'office wise filter',
+    },
+  ];
+
+
   return (
-    <View style={{height: '100%'}}>
+    <View style={{height: '100%', backgroundColor: globalColors.white}}>
       <View style={{flexDirection: 'row', alignSelf: 'flex-end', margin: 10}}>
         <View style={styles.searchBarView}>
           <View style={styles.centerStyles}>
@@ -153,15 +215,24 @@ function Leaves({navigation}) {
             value={search}
             onChangeText={text => setSearch(text)}
             placeholder={'Search'}
-            style={styles.searchInput}
+            style={{width:'100%'}}
           />
-          </View>
+        </View>
+
+        <TouchableOpacity onPress={() => setFilterModal(true)}>
+          <Icons
+            style={styles.filterIcon}
+            name="filter-list"
+            size={33}
+            color={globalColors.primaryTheme}
+          />
+        </TouchableOpacity>
 
         <View style={{marginTop: 10}}>
           <FontAwesome
             name={'plus-circle'}
             size={40}
-            color={'#F58E5E'}
+            color={globalColors.Orange}
             onPress={onPressLearnMore}
           />
         </View>
@@ -171,77 +242,90 @@ function Leaves({navigation}) {
           <Title style={styles.titletext}>My Leaves</Title>
           <Divider style={styles.divider} />
 
-          {/* <View style={styles.cardstyle}>
-            {leave?.leave?.length > 0 && (
+          <View style={styles.cardstyle}>
+            {results.map((item, index) => (
               <>
                 <Card style={styles.cardDesign}>
-                  <View style={styles.cardContent}>
-                    <Paragraph style={styles.subtext}>ID : </Paragraph>
-                    <Text style={styles.cardText}>
-                      {leave?.leave[0].totaltypecount}
-                    </Text>
-                  </View>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <Paragraph style={styles.subtext}>Name : </Paragraph>
-                    <Text style={styles.cardText}>
-                      {leave?.leave[0].totaltypecount}
-                    </Text>
-                  </View>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <Paragraph style={styles.subtext}>Leave Type : </Paragraph>
-                    <Text style={styles.cardText}>
-                      {leave?.leave[0].totaltypecount}
-                    </Text>
-                  </View>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <Paragraph style={styles.subtext}>
-                      Leave Duration :{' '}
-                    </Paragraph>
-                    <Text style={styles.cardText}>
-                      {leave?.leave[0].totaltypecount}
-                    </Text>
-                  </View>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <Paragraph style={styles.subtext}>No of Days : </Paragraph>
-                    <Text style={styles.cardText}>
-                      {' '}
-                      {leave?.leave[0].totaltypecount}
-                    </Text>
-                  </View>
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <Paragraph style={styles.subtext}>Applied on : </Paragraph>
-                    <Text style={styles.cardText}>
-                      {leave?.leave[0].totaltypecount}
-                    </Text>
-                  </View>
-                  <Divider style={styles.divider} />
-                  <View style={styles.cardButton}>
-                    <Title style={styles.pendingtext}>Pending</Title>
-                    <DatePickerModal
-                      locale="en"
-                      mode="single"
-                      visible={open}
-                      onDismiss={onDismissSingle}
-                      date={date}
-                      onConfirm={onConfirmSingle}
-                    />
+                  <View style={[styles.firstRow]}>
+                    <View>
+                      <Text style={styles.leaveType}>{item.leaveType}</Text>
+                    </View>
 
-                    <DatePickerModal
-                      locale="en"
-                      mode="single"
-                      visible={formopen}
-                      onDismiss={onFormDismiss}
-                      dates={formDate}
-                      onConfirm={onFormConfirm}
-                    />
-                   
+                    <View
+                      style={[
+                        styles.pendingtext,
+                        {
+                          backgroundColor: getLeaveStatusColor(
+                            item.leaveStatus,
+                          ),
+                        },
+                      ]}>
+                      <MaterialIcons
+                        name="pending-actions"
+                        style={{color: globalColors.white}}
+                        size={20}
+                      />
+                      <Text style={{color: globalColors.white}}>
+                        {item.leaveStatus}
+                      </Text>
+                    </View>
                   </View>
+                  {/* <Text>Leave Reason</Text> */}
+                  <View style={[styles.secondRow]}>
+                    <View style={styles.icon}>
+                      <MaterialIcons
+                        name="leave-bags-at-home"
+                        size={20}
+                        color="white"
+                      />
+                    </View>
+                    <View style={{paddingLeft: 10}}>
+                      <Text>Leave from :</Text>
+                    </View>
+                    <View>
+                      <Text style={styles.textRight}> {item.date}</Text>
+                    </View>
+                  </View>
+                  <View style={[styles.secondRow, {alignItems: 'center'}]}>
+                    <View style={styles.icon}>
+                      <MaterialIcons name="today" size={20} color="white" />
+                    </View>
+                    <View style={{paddingLeft: 10}}>
+                      <Text>Days : {item.days}</Text>
+                    </View>
+                  </View>
+                  <View style={{paddingVertical: 5}}>
+                    <Text>{item.reason}</Text>
+                  </View>
+                  {/* { item.leaveStatus != 'Approved' && item.leaveStatus != 'Cancelled' ? 
+                    <View
+                    style={{
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                    }}>
+                    <Button mode="contained" style={styles.cancelButtonStyle}>
+                      Cancel
+                    </Button>
+                    <Button
+                      mode="contained"
+                      style={[styles.editButtonStyle, {color: '#fff'}]}>
+                      Edit
+                    </Button>
+                  </View> : ''
+                  } */}
                 </Card>
               </>
-            )}
-          </View> */}
+            ))}
 
-          {leavesArray.map((item, index) => (
+            {results.length === 0 && search !== '' && (
+              <View style={styles.noDataFoundContainer}>
+                <Text style={styles.noDataFoundText}>No data found</Text>
+              </View>
+            )}
+          </View>
+          
+
+          {/* {leavesArray.map((item, index) => (
             <Card style={styles.cardDesign} key={index}>
               <View style={styles.cardContent}>
                 <Paragraph style={styles.subtext}>ID : </Paragraph>
@@ -285,18 +369,74 @@ function Leaves({navigation}) {
                 />
               </View>
             </Card>
-          ))}
+          ))} */}
         </View>
       </ScrollView>
+
+      <FilterModal
+        visible={filterModal}
+        onRequestClose={() => setFilterModal(false)}
+        filterOptions={filterOptions}
+      />
+      
     </View>
   );
 }
 export default Leaves;
 
 const styles = StyleSheet.create({
+  filterIcon: {
+    paddingHorizontal: RFValue(5),
+    paddingVertical: RFValue(2),
+    marginTop: RFValue(12),
+  },
+  noDataFoundContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
+  noDataFoundText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'red',
+  },
+  icon: {
+    backgroundColor: globalColors.darkBlue,
+    borderRadius: 50,
+    padding: 5,
+  },
+  textRight: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  leaveType: {
+    fontSize: RFValue(18),
+    fontWeight: 'bold',
+  },
+  cancelButtonStyle: {
+    borderRadius: 5,
+    backgroundColor: globalColors.Orange,
+    borderColor: '#E9ECEF',
+  },
+  editButtonStyle: {
+    backgroundColor: globalColors.skyBlue,
+    borderColor: '#fff',
+    borderRadius: 5,
+  },
+  firstRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  secondRow: {
+    flexDirection: 'row',
+    width: '100%',
+    alignItems: 'center',
+    marginVertical: 5,
+  },
   searchBarView: {
     marginHorizontal: 5,
-    width: '85%',
+    width: '75%',
     height: RFValue(40),
     borderWidth: 1,
     paddingHorizontal: RFValue(8),
@@ -338,12 +478,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   pendingtext: {
-    backgroundColor: '#FFC000',
-    fontSize: 15,
     color: '#fff',
-    paddingHorizontal: 25,
-    paddingVertical: 1,
+    paddingHorizontal: 15,
+    paddingVertical: 5,
     borderRadius: 20,
+    flexDirection: 'row',
   },
   buttonStyle: {
     justifyContent: 'center',
@@ -352,11 +491,17 @@ const styles = StyleSheet.create({
     borderColor: '#626ed4',
   },
 
+  cardstyle: {
+    marginBottom: 10,
+  },
+
   cardDesign: {
     padding: 20,
     backgroundColor: '#fff',
     borderRadius: 10,
     marginTop: 15,
+    elevation: 10,
+    marginVertical: 5,
   },
 
   cardContent: {
